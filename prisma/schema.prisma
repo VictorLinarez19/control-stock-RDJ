@@ -1,0 +1,66 @@
+// Schema del control de stock.
+// Documentacion: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Tipo de repuesto: rodamiento, bieleta, anillos, etc.
+model Categoria {
+  id        Int        @id @default(autoincrement())
+  nombre    String     @unique
+  productos Producto[]
+}
+
+model Producto {
+  id             Int          @id @default(autoincrement())
+  nombre         String
+  codigo         String       @unique
+  categoriaId    Int
+  categoria      Categoria    @relation(fields: [categoriaId], references: [id])
+  /// Carros con los que es compatible, texto libre: "Corolla 2005-2010"
+  compatibilidad String?
+  cantidadStock  Int          @default(0)
+  costo          Decimal?     @db.Decimal(12, 2)
+  precioVenta    Decimal      @db.Decimal(12, 2)
+  /// Debajo de esta cantidad el producto se marca en stock bajo
+  stockMinimo    Int          @default(0)
+  /// Baja logica: al "eliminar" se pone en false y el historial queda intacto
+  activo         Boolean      @default(true)
+  movimientos    Movimiento[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([categoriaId])
+  @@index([activo])
+}
+
+enum TipoMovimiento {
+  /// Llego mercancia: suma al stock.
+  ENTRADA
+  /// Venta: resta del stock.
+  SALIDA
+  /// Correccion despues de contar fisicamente: fija el stock a la cantidad real.
+  AJUSTE
+}
+
+model Movimiento {
+  id         Int            @id @default(autoincrement())
+  productoId Int
+  producto   Producto       @relation(fields: [productoId], references: [id])
+  tipo       TipoMovimiento
+  /// Siempre positivo. En ENTRADA y SALIDA es cuanto entro o salio; en AJUSTE
+  /// es la cantidad real contada a la que quedo el stock.
+  cantidad   Int
+  /// Foto del precio de venta al momento de la salida.
+  precioUnitario Decimal?   @db.Decimal(12, 2)
+  nota       String?
+  createdAt  DateTime       @default(now())
+
+  @@index([productoId, createdAt])
+}

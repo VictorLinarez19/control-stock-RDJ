@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Interfaz clara a proposito: se usa a diario en el negocio, muchas veces con
+   luz de dia sobre la pantalla del celular, donde el modo oscuro se lee peor. */
+body {
+  background: #f1f5f9;
+  color: #0f172a;
+}

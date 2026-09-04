@@ -4,6 +4,10 @@ import { NuevaCategoria } from "@/components/NuevaCategoria";
 import { actualizarProducto, desactivarProducto } from "@/lib/actions/productos";
 import { listarCategorias, obtenerProducto } from "@/lib/consultas";
 
+// Misma razon que en productos/nuevo: evita que la lista de categorias (y el
+// producto mismo) queden congelados desde el momento del deploy.
+export const dynamic = "force-dynamic";
+
 export default async function PaginaEditarProducto({
   params,
 }: PageProps<"/productos/[id]/editar">) {
